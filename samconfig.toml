@@ -1,0 +1,14 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "wolfscratch-api-dev"
+resolve_s3 = true
+s3_prefix = "wolfscratch-api-dev"
+region = "us-east-1"
+profile = "wolfscratch-api"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+
+[default.global.parameters]
+region = "us-east-1"
