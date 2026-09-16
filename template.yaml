@@ -51,4 +51,9 @@ Resources:
           Properties:
             Path: /programs
             Method: GET
+        GetProgram:
+          Type: HttpApi
+          Properties: 
+            Path: /programs/{programId}
+            Method: GET
             
