@@ -56,4 +56,44 @@ Resources:
           Properties: 
             Path: /programs/{programId}
             Method: GET
-            
+  ClassesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: classId
+          AttributeType: S
+        - AttributeName: programId
+          AttributeType: S  
+      KeySchema:
+        - AttributeName: classId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: ClassesByProgram
+          KeySchema:
+            - AttributeName: programId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+  ClassesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.14
+      Architectures:
+        - arm64
+      CodeUri: src/
+      Handler: classes.lambda_handler
+      MemorySize: 128
+      Timeout: 5
+      Environment:
+        Variables:  
+          CLASSES_TABLE: !Ref ClassesTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ClassesTable
+      Events:
+        GetClassesByProgram:
+          Type: HttpApi
+          Properties: 
+            Path: /programs/{programId}/classes
+            Method: GET        
