@@ -14,6 +14,25 @@ table = dynamodb.Table(os.environ["CLASSES_TABLE"])
 def lambda_handler(event, context):
     path_parameters = event.get("pathParameters") or {}
     program_id = path_parameters.get("programId")
+    class_id = path_parameters.get("classId")
+
+    if class_id is not None:
+        response = table.get_item(Key={"classId": class_id})
+        class_record = response.get("Item")
+
+        if class_record is None:
+            return {
+                "statusCode": 404,
+                "headers": {"Content-Type":"application/json"},
+                "body": json.dumps({"message": "Class not found"})
+            }
+
+        return {
+                "statusCode": 200,
+                "headers": {"Content-Type":"application/json"},
+                "body": json.dumps({"class": class_record})
+            }
+
 
     if program_id is not None:
 
@@ -37,5 +56,5 @@ def lambda_handler(event, context):
     return {
         "statusCode": 400,
         "headers": {"Content-Type": "application/json"},
-        "body": json.dumps({"message": "programId is required"})
+        "body": json.dumps({"message": "classId or programId is required"})
     }
