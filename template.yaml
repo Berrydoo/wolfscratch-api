@@ -102,3 +102,48 @@ Resources:
           Properties:
             Path: /classes/{classId} 
             Method: GET   
+  MeetingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: meetingId
+          AttributeType: S
+        - AttributeName: classId
+          AttributeType: S
+        - AttributeName: startsAt
+          AttributeType: S    
+      KeySchema:
+        - AttributeName: meetingId
+          KeyType: HASH  
+      GlobalSecondaryIndexes:
+        - IndexName: MeetingsByClass
+          KeySchema:
+            - AttributeName: classId
+              KeyType: HASH
+            - AttributeName: startsAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL  
+  MeetingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.14
+      Architectures:
+        - arm64
+      CodeUri: src/
+      Handler: meetings.lambda_handler
+      MemorySize: 128
+      Timeout: 5
+      Environment:
+        Variables:  
+          MEETINGS_TABLE: !Ref MeetingsTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MeetingsTable
+      Events:
+        GetMeetingsByClass:
+          Type: HttpApi
+          Properties: 
+            Path: /classes/{classId}/meetings
+            Method: GET
